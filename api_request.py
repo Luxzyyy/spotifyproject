@@ -1,6 +1,7 @@
 import pandas as pd 
 import requests
 import time
+from dotenv import load_dotenv
 
 
 
@@ -165,9 +166,11 @@ artist_ids = [
 
 # Main execution
 try:
-    # Credentials you get from registering a new application
-    client_id = "6118430189f04c9180d5ca4ab9bb52b2"
-    client_secret = "d67984c951af4808a57628791da78eb3"
+
+    # Load secrets from environment variables
+    load_dotenv()
+    client_id = os.getenv('SPOTIFY_CLIENT_ID')
+    client_secret = os.getenv('SPOTIFY_CLIENT_SECRET')
     
     # Get access token
     token = get_spotify_token(client_id, client_secret)
