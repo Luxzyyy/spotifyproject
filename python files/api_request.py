@@ -1,6 +1,7 @@
 import pandas as pd 
 import requests
 import time
+import os
 from dotenv import load_dotenv
 
 
@@ -73,6 +74,12 @@ def create_artists_dataframe(artists_data):
             'genres': ', '.join(artist['genres']),
             'spotify_url': artist['external_urls']['spotify']
         }
+
+        # Add album image if available
+        if artist['images']:
+            record['album_image'] = artist['images'][0]['url']
+        else:
+            record['album_image'] = None
         artist_records.append(record)
     
     return pd.DataFrame(artist_records)
