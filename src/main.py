@@ -4,18 +4,14 @@ import pandas as pd
 import requests
 import time
 import os
+import json
 from dotenv import load_dotenv
 from supabase import create_client, Client
 from typing import Union
 
 
-artist_ids = [
-    '2YZyLoL8N0Wb9xBt1NhZWg',  # Kendrick Lamar
-    '0Y4inQK6OespitzD6ijMwb',  # Freddie Gibbs
-    '4V8LLVI7PbaPR0K2TGSxFF',  # Tyler, The Creator
-    '6fxyWrfmjcbj5d12gXeiNV',  # Denzel Curry
-    '3zz52ViyCBcplK0ftEVPSS'   # Quadeca
-]
+
+artist_ids = json.loads(os.getenv("ARTIST_IDS_JSON", "[]"))
 
 
 try:
