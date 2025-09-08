@@ -1,41 +1,28 @@
 from supabase import create_client, Client
 import pandas as pd
 from typing import Union
+from sqlalchemy import create_engine, inspect
+import psycopg2
+
 
 def upload_df_to_supabase(
     df: pd.DataFrame,
     table_name: str,
     supabase_url: str,
-    supabase_key: str
+    supabase_key: str,
+    db_url: str
 ) -> Union[dict, None]:
-    """
-    Uploads a DataFrame to a Supabase table.
-
-    Args:
-        df (pd.DataFrame): The data to insert.
-        table_name (str): The name of the table in Supabase.
-        supabase_url (str): The URL of your Supabase project.
-        supabase_key (str): Your Supabase anon or service role API key.
-
-    Returns:
-        dict or None: Response from Supabase if successful, None if failed.
-    """
     try:
-        # Create Supabase client
-        supabase: Client = create_client(supabase_url, supabase_key)
-
-        # Convert DataFrame to list of records (dicts)
-        records = df.to_dict(orient="records")
-
-        # Insert records (up to 1000 at a time for Supabase API)
-        if records:
-            response = supabase.table(table_name).insert(records).execute()
-            print(f"Inserted {len(records)} records into '{table_name}'")
-            return response
-        else:
-            print("DataFrame is empty. Nothing to insert.")
-            return None
-
+        engine = create_engine(db_url)
+        with engine.connect() as connection:
+            inspector = inspect(engine)
+            if not inspector.has_table(table_name):
+                df.to_sql(table_name, con=connection, if_exists='replace', index=False)
+                print(f"Table '{table_name}' created and data inserted successfully.")
+            else:
+                df.to_sql(table_name, con=connection, if_exists='append', index=False)
+                print(f"Data appended to existing table '{table_name}' successfully.")
+        return {"status": "success", "message": f"Data uploaded to table '{table_name}' successfully."}
     except Exception as e:
-        print(f"❌ Error uploading to Supabase: {e}")
-        return None
+        print(f"❌ Error uploading data to Supabase: {e}")
+        return {"status": "error", "message": str(e)} 
